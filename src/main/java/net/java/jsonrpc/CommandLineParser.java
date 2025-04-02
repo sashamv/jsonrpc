@@ -78,11 +78,12 @@ public class CommandLineParser {
     }
 
     private static String showHelp() {
-        return "Usage: java ScpCommandLineParser [options]\n" +
-                "Options:\n" +
-                "  -h, --help        Show help\n" +
-                "  -c, Загальна кількість\n" +
-                "   <пошук>";
+        return """
+                Usage: java ScpCommandLineParser [options]
+                Options:
+                  -h, --help        Show help
+                  -c, Загальна кількість
+                   <пошук>""";
     }
 
     private static void sendMessage(String sourceNumber, String message){

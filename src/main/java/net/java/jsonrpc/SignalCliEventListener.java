@@ -10,7 +10,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class SignalCliEventListener {
-    private static String url = "http://" + GetPropety.get("RPC_HOST")
+    private static final String url = "http://" + GetPropety.get("RPC_HOST")
                                     + ":" + GetPropety.get("RPC_PORT")
                                         + "/api/v1/events";
     //private static final String SIGNAL_CLI_URL = "http://localhost:8080/api/v1/events";
