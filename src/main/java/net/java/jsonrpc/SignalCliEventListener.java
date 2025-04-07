@@ -1,5 +1,8 @@
 package net.java.jsonrpc;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,6 +13,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class SignalCliEventListener {
+    private static final Logger log = LoggerFactory.getLogger(SignalCliEventListener.class);
     private static final String url = "http://" + GetPropety.get("RPC_HOST")
                                     + ":" + GetPropety.get("RPC_PORT")
                                         + "/api/v1/events";
@@ -18,9 +22,11 @@ public class SignalCliEventListener {
     private static final String SIGNAL_CLI_URL = url;
 
     public static void main(String[] args) {
+        SignalCliEventParser signalCliEventParser = new SignalCliEventParser();
         while (true) {  // Infinite loop for reconnection attempts
             HttpURLConnection connection = null;
-            //System.out.println("SIGNAL_CLI_URL = " + SIGNAL_CLI_URL);
+            log.info("SIGNAL_CLI_URL = {}", SIGNAL_CLI_URL);
+
             try {
                 URL url = new URL(SIGNAL_CLI_URL);
                 connection = (HttpURLConnection) url.openConnection();
@@ -36,18 +42,17 @@ public class SignalCliEventListener {
 
                 while ((inputLine = in.readLine()) != null) {
                     if (!inputLine.isBlank()) {
-                        SignalCliEventParser signalCliEventParser = new SignalCliEventParser();
                         signalCliEventParser.eventParser(inputLine);
                     }
                 }
                 in.close();
 
             } catch (SocketException e) {
-                System.out.println("Connection lost: " + e.getMessage());
+                log.info("Connection lost: {}", e.getMessage());
             } catch (SocketTimeoutException e){
-                System.out.println("Read timeout: No data received, retrying...");
+                log.info("Read timeout: No data received, retrying...");
             } catch (IOException e) {
-                System.out.println("Connection error: " + e.getMessage());
+                log.info("Connection error occurred: {}", e.getMessage());
             } finally {
                 if (connection != null) {
                     connection.disconnect();
