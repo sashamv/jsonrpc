@@ -2,15 +2,12 @@ package net.java.jsonrpc;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
+
 
 public class SignalCliEventListener {
     private static final Logger log = LoggerFactory.getLogger(SignalCliEventListener.class);
@@ -20,15 +17,24 @@ public class SignalCliEventListener {
     //private static final String SIGNAL_CLI_URL = "http://localhost:8080/api/v1/events";
 
     private static final String SIGNAL_CLI_URL = url;
+    private static volatile boolean running = true;
 
     public static void main(String[] args) {
         SignalCliEventParser signalCliEventParser = new SignalCliEventParser();
-        while (true) {  // Infinite loop for reconnection attempts
+
+        // Register shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.info("Shutdown signal received. Stopping SignalCliEventListener...");
+            running = false;
+        }));
+
+        while (running) {  // Infinite loop for reconnection attempts
             HttpURLConnection connection = null;
             log.info("SIGNAL_CLI_URL = {}", SIGNAL_CLI_URL);
+            URI uri = URI.create(SIGNAL_CLI_URL);
 
             try {
-                URL url = new URL(SIGNAL_CLI_URL);
+                URL url = uri.toURL();
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("Accept", "text/event-stream");
@@ -56,8 +62,8 @@ public class SignalCliEventListener {
                 }
 
 
-            } catch (SocketException e) {
-                log.info("Connection lost: {}", e.getMessage());
+//            } catch (SocketException e) {
+//                log.info("Connection lost: {}", e.getMessage());
             } catch (SocketTimeoutException e){
                 log.info("Read timeout: No data received, retrying...");
             } catch (IOException e) {
@@ -68,12 +74,18 @@ public class SignalCliEventListener {
                 }
             }
             // Wait before retrying to avoid rapid reconnection attempts
-            try {
-                Thread.sleep(2000); // 2-second delay before retrying
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
+            if (running) {
+                try {
+                    //noinspection BusyWait
+                    Thread.sleep(2000); // 2-second delay before retrying
+                } catch (InterruptedException ie) {
+                    log.info("Interrupted during sleep. Exiting...");
+                    running = false;
+                    Thread.currentThread().interrupt();
+                }
             }
         }
+        log.info("SignalCliEventListener stopped.");
     }
 }
 
