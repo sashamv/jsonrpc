@@ -35,17 +35,26 @@ public class SignalCliEventListener {
                 connection.setRequestProperty("Connection", "keep-alive");
                 connection.setConnectTimeout(10000); // 10 seconds
                 connection.setReadTimeout(0);     // Disable read timeout for persistent connection
-
-                // Start reading the event stream
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
-                String inputLine;
-
-                while ((inputLine = in.readLine()) != null) {
-                    if (!inputLine.isBlank()) {
-                        signalCliEventParser.eventParser(inputLine);
+                connection.connect(); // Explicitly connect or let getResponseCode do itv
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    // Start reading the event stream
+                    try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                        String inputLine;
+                        while ((inputLine = in.readLine()) != null) {
+                            if (!inputLine.isBlank()) {
+                                signalCliEventParser.eventParser(inputLine);
+                            }
+                        }
+//                in.close();
+                    } catch (Exception e) {
+                        log.error("Error reading the event stream", e);
                     }
+                } else {
+                    // Handle error - log
+                    log.error("HTTP Error: {} {}", responseCode ,connection.getResponseMessage());
                 }
-                in.close();
+
 
             } catch (SocketException e) {
                 log.info("Connection lost: {}", e.getMessage());
