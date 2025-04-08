@@ -59,15 +59,28 @@ public class SignalCliEventListener {
                 } else {
                     // Handle error - log
                     log.error("HTTP Error: {} {}", responseCode ,connection.getResponseMessage());
+                    // Attempt to read error stream for more details
+                    try (BufferedReader err = new BufferedReader(new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8))) {
+                        String errorLine;
+                        StringBuilder errorResponse = new StringBuilder();
+                        while ((errorLine = err.readLine()) != null) {
+                            errorResponse.append(errorLine);
+                        }
+                        if (!errorResponse.isEmpty()) {
+                            log.error("Error stream response: {}", errorResponse);
+                        }
+                    } catch (IOException ex) {
+                        log.warn("IOException while reading error stream: {}", ex.getMessage());
+                    }
                 }
 
 
 //            } catch (SocketException e) {
 //                log.info("Connection lost: {}", e.getMessage());
-            } catch (SocketTimeoutException e){
-                log.info("Read timeout: No data received, retrying...");
+//            } catch (SocketTimeoutException e){
+//                log.warn("Read timeout: No data received, retrying...");
             } catch (IOException e) {
-                log.info("Connection error occurred: {}", e.getMessage());
+                log.error("Connection error occurred: {}", e.getMessage());
             } finally {
                 if (connection != null) {
                     connection.disconnect();
@@ -79,7 +92,7 @@ public class SignalCliEventListener {
                     //noinspection BusyWait
                     Thread.sleep(2000); // 2-second delay before retrying
                 } catch (InterruptedException ie) {
-                    log.info("Interrupted during sleep. Exiting...");
+                    log.error("Interrupted during sleep. Exiting...");
                     running = false;
                     Thread.currentThread().interrupt();
                 }
