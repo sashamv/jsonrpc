@@ -65,7 +65,7 @@ public class CommandLineParser {
         }
         log.info("Handling delete for s/n: {}", serialNumbers);
         //String result =
-        sendResponse(recipient, "Функція знаходться в розробці");
+        sendResponse(recipient, "Функція видалення знаходться в розробці ¯\\_(ツ)_/¯");
     }
 
     private static void handleUpdate(String recipient, String args){
@@ -78,7 +78,7 @@ public class CommandLineParser {
         String updateDataString = updateParts[1];
         log.info("Handling update for S/N: {}, Data: {}", serialNumber, updateDataString);
         //String result =
-        sendResponse(recipient, "Функція знаходться в розробці");
+        sendResponse(recipient, "Функція оновлення знаходться в розробці ¯\\_(ツ)_/¯");
 
     }
 
