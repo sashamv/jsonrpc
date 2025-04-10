@@ -36,11 +36,11 @@ public class CommandLineParser {
 
     private static void handleHelp(String recipient){
         String helpText = """
-                Available commands:
-                <serial_number> - Search for device
-                help - Show this help message
-                update <serial_number> - <field=value> [field2=value2]... - Update device info
-                delete <serial_number> - Delete device""";
+                Доступні команди:
+                <serial_number> - пошук пристрою
+                help - Показати це повідомлення
+                update <serial_number> - <field=value> [field2=value2]... - Оновити інформацію про пристрій
+                delete <serial_number> - видалити пристрій""";
         sendResponse(recipient, helpText);
     }
 
