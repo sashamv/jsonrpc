@@ -4,21 +4,29 @@ import com.thetransactioncompany.jsonrpc2.client.JSONRPC2Session;
 import com.thetransactioncompany.jsonrpc2.client.JSONRPC2SessionException;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SignalCliSend {
+    private static final Logger log = LoggerFactory.getLogger(SignalCliSend.class);
 
-    public static void SignalCliSend(String recipient, String message) {
+    public static void signalCliSend(String recipient, String message) {
         try {
             String url = "http://" + GetPropety.get("RPC_HOST")
                     + ":" + GetPropety.get("RPC_PORT")
                     + "/api/v1/rpc";
             // Правильний URL JSON-RPC сервера
-            //URL serverURL = new URL("http://localhost:8080/api/v1/rpc");
-            URL serverURL = new URL(url);
+            log.debug("URL of JSON-RPC server: {}", url);
+
+            URI uri = URI.create(url);
+            URL serverURL = uri.toURL();
+
+//            URL serverURL = new URL(url);
 
             // Створення сесії JSON-RPC
             JSONRPC2Session session = new JSONRPC2Session(serverURL);
@@ -38,19 +46,19 @@ public class SignalCliSend {
 
             // Перевірка відповіді
             if (response.indicatesSuccess()) {
-                System.out.println("Результат: " + response.getResult());
+                log.info("Результат: {}", response.getResult());
             } else {
-                System.out.println("Помилка: " + response.getError().getMessage());
+                log.info("Помилка: {}", response.getError().getMessage());
             }
 
         } catch (JSONRPC2SessionException e) {
             if (e.getMessage().contains("Unexpected \"text/html\" content type")) {
-                System.out.println("Сервер повернув HTML замість JSON. Перевірте конфігурацію сервера.");
+                log.error("Сервер повернув HTML замість JSON. Перевірте конфігурацію сервера.");
             } else {
-                e.printStackTrace();
+                log.error(e.toString());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString());
         }
     }
 }

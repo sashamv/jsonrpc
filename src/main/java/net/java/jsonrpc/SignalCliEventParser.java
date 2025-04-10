@@ -2,8 +2,12 @@ package net.java.jsonrpc;
 
 import org.json.JSONObject;
 import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SignalCliEventParser {
+    private static final Logger log = LoggerFactory.getLogger(SignalCliEventParser.class);
+    private final CheckPhoneNumberInList checkPhoneNumberInList = new CheckPhoneNumberInList();
 
     public void eventParser(String m) {
 
@@ -11,11 +15,10 @@ public class SignalCliEventParser {
             //System.out.println(m.substring(5));
             try {
                 JSONObject jo = new JSONObject(m.substring(5));
-                CheckPhoneNumberInList check = new CheckPhoneNumberInList();
 
                 if (jo.has("envelope")) {
                     jo = jo.getJSONObject("envelope");
-                    if (check.check(jo) && jo.has("dataMessage") || jo.has("editMessage")) {
+                    if (checkPhoneNumberInList.check(jo) && jo.has("dataMessage") || jo.has("editMessage")) {
                         String sourceNumber = jo.getString("sourceNumber");
                         String message;
                         if (jo.has("dataMessage")) {
@@ -23,16 +26,14 @@ public class SignalCliEventParser {
                         } else {
                             message = jo.getJSONObject("editMessage").getJSONObject("dataMessage").getString("message");
                         }
-                        // System.out.println("sourceNumber =" + sourceNumber);
-                        // System.out.println("message =" + message);
+                        log.debug("sourceNumber = {}", sourceNumber);
+                        log.debug("message = {}", message);
                         CommandLineParser.lineParser(sourceNumber, message);
 
-                    } /*else {
-                            System.out.println("Source number or message was not initialized.");
-                        }*/
+                    }
                 }
             } catch (JSONException e) {
-                System.out.println("Error json : " + e);
+                log.error("Error parsing JSON data: {}", e.toString());
             }
         }
     }

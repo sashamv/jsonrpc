@@ -1,11 +1,16 @@
 package net.java.jsonrpc;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
 public class GetPropety {
+    private static final Logger log = LoggerFactory.getLogger(GetPropety.class);
+
     static String get(String s){
         try {
             Properties prop = new Properties();
@@ -13,12 +18,12 @@ public class GetPropety {
             prop.load(file);
             file.close();
             if (prop.getProperty(s) == null) {
-                System.out.println("The property " + s + " is null");
+                log.info("The property {} is null", s);
                 System.exit(1);
             }
             return prop.getProperty(s);
         } catch (FileNotFoundException e) {
-            System.out.println("config.properties file not found");
+            log.error("config.properties file not found");
             System.exit(1);
         } catch (IOException e) {
             throw new RuntimeException(e);

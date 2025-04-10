@@ -2,6 +2,8 @@ package net.java.jsonrpc;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 import javax.sql.DataSource;
 
 public class SignalGetData {
+    private static final Logger log = LoggerFactory.getLogger(SignalGetData.class);
     private static DataSource dataSource = null;
 
     public static List<String> getData(String searchWord){
@@ -16,6 +19,7 @@ public class SignalGetData {
         String query = "SELECT * FROM rst WHERE LOWER(serial_number) LIKE LOWER(?) or " +
                                                         "LOWER(main_location) LIKE LOWER(?) or " +
                                                             "LOWER(location) LIKE LOWER(?)";
+        log.debug("SQL query: {}", query);
         initializedataSource();
         List<String> result = new ArrayList<>();
 
@@ -45,12 +49,11 @@ public class SignalGetData {
                                 codeplag_v);
                 }
 
-/*                resultSet.close();
-                preparedStatement.close();*/
                 connection.close();
                 return result;
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                log.error("Database error occurred. Details: {}", e.getMessage(), e);
+                throw new RuntimeException("Database operation failed. Original exception: " + e.getMessage(), e);
             }
     }
 
@@ -59,8 +62,10 @@ public class SignalGetData {
                 "LOWER(main_location) LIKE LOWER(?) or " +
                 "LOWER(location) LIKE LOWER(?)";
 
+        log.debug("SQL count query: {}", query);
+
         initializedataSource();
-        Integer result;
+        int result;
         try {
             result = 0;
             Connection connection = dataSource.getConnection();
@@ -74,7 +79,8 @@ public class SignalGetData {
             }
             connection.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Database error occurred. Details: {}", e.getMessage(), e);
+            throw new RuntimeException("Database operation failed. Original exception: " + e.getMessage(), e);
         }
         return result;
     }
@@ -82,6 +88,9 @@ public class SignalGetData {
     private static void initializedataSource (){
         String JdbcUrl = "jdbc:postgresql://" + GetPropety.get("DB_HOST") + ":" + GetPropety.get("DB_PORT") + "/";
         String Username = GetPropety.get("DB_USER");
+        log.debug("Initialize Data Source ...");
+        log.debug("DB JDBC URL: {}", JdbcUrl);
+        log.debug("DB User name: {}", Username);
         String Password = GetPropety.get("DB_PASSWORD");
         if(dataSource == null) {
             HikariConfig config = new HikariConfig();

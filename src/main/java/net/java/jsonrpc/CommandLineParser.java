@@ -25,7 +25,7 @@ public class CommandLineParser {
                     if (i + 1 < args.length) {
                         addItem = args[++i];
                     } else {
-                        SignalCliSend.SignalCliSend(sourceNumber,"Error: Missing argument for -a/--add");
+                        SignalCliSend.signalCliSend(sourceNumber,"Error: Missing argument for -a/--add");
                         break;
                     }
                     break;
@@ -34,7 +34,7 @@ public class CommandLineParser {
                     if (i + 1 < args.length) {
                         deleteItem = args[++i];
                     } else {
-                        SignalCliSend.SignalCliSend(sourceNumber,"Error: Missing argument for -d/--delete");
+                        SignalCliSend.signalCliSend(sourceNumber,"Error: Missing argument for -d/--delete");
                         break;
                     }
                     break;
@@ -42,7 +42,7 @@ public class CommandLineParser {
                     if (i + 1 < args.length) {
                         searchItem = args[++i];
                     } else {
-                        SignalCliSend.SignalCliSend(sourceNumber,"Error: Missing arguments for -c");
+                        SignalCliSend.signalCliSend(sourceNumber,"Error: Missing arguments for -c");
                         break;
                     }
                     break;
@@ -53,26 +53,26 @@ public class CommandLineParser {
 
         // Show help if requested or if no other options are used
         if (showHelp || args.length == 0) {
-            SignalCliSend.SignalCliSend(sourceNumber, showHelp());
+            SignalCliSend.signalCliSend(sourceNumber, showHelp());
 
         }
 
         // Handle add operation
         if (addItem != null) {
-            SignalCliSend.SignalCliSend(sourceNumber,"Adding item: " + addItem);
+            SignalCliSend.signalCliSend(sourceNumber,"Adding item: " + addItem);
             // Perform add operation here
         }
 
         // Handle delete operation
         if (deleteItem != null) {
-            SignalCliSend.SignalCliSend(sourceNumber,"Deleting item: " + deleteItem);
+            SignalCliSend.signalCliSend(sourceNumber,"Deleting item: " + deleteItem);
             // Perform delete operation here
         }
 
         // Handle change operation
         if (searchItem != null) {
             Integer result = SignalGetData.countSearchFields(searchItem);
-            SignalCliSend.SignalCliSend(sourceNumber,"Count item: " + result);
+            SignalCliSend.signalCliSend(sourceNumber,"Count item: " + result);
             // Perform change operation here
         }
     }
@@ -88,7 +88,7 @@ public class CommandLineParser {
 
     private static void sendMessage(String sourceNumber, String message){
         SignalCliSend signalCliSend = new SignalCliSend();
-        signalCliSend.SignalCliSend(sourceNumber, message);
+        signalCliSend.signalCliSend(sourceNumber, message);
     }
 
     //Try to find the item if no argument is given
@@ -96,10 +96,10 @@ public class CommandLineParser {
         List<String> results = new ArrayList<>();
         results = SignalGetData.getData(arg);
         if (results.isEmpty()){
-            SignalCliSend.SignalCliSend(sourceNumber, "Запису не знайдено");
+            SignalCliSend.signalCliSend(sourceNumber, "Запису не знайдено");
         } else {
             for(String result : results){
-                SignalCliSend.SignalCliSend(sourceNumber, result);
+                SignalCliSend.signalCliSend(sourceNumber, result);
             }
         }
     }
