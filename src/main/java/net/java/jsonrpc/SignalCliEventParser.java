@@ -33,7 +33,7 @@ public class SignalCliEventParser {
                     }
                 }
             } catch (JSONException e) {
-                log.error("Error parsing JSON data: {}", e.toString());
+                log.error("Error parsing JSON data: {}", e.getMessage(), e);
             }
         }
     }

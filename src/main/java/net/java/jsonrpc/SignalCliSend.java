@@ -55,10 +55,10 @@ public class SignalCliSend {
             if (e.getMessage().contains("Unexpected \"text/html\" content type")) {
                 log.error("Сервер повернув HTML замість JSON. Перевірте конфігурацію сервера.");
             } else {
-                log.error(e.toString());
+                log.error("Error occurred: {}", e.getMessage(), e);
             }
         } catch (Exception e) {
-            log.error(e.toString());
+            log.error("Error occurred: {}", e.getMessage(), e);
         }
     }
 }

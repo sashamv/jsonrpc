@@ -1,110 +1,89 @@
 package net.java.jsonrpc;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
-import java.util.ArrayList;
+
 
 public class CommandLineParser {
+    private static final Logger log = LoggerFactory.getLogger(CommandLineParser.class);
 
     public static void lineParser(String sourceNumber, String message) {
-      String[]  args = message.split("\s");
-        // Variables to hold command line option values
-        boolean showHelp = false;
-        String addItem = null;
-        String deleteItem = null;
-        String searchItem = null;
+        String trimmedMessage = message.trim();
+        String[] parts = trimmedMessage.split("\\s+", 2);
+        String command = parts[0].toLowerCase();
 
-        // Parse arguments manually
-        for (int i = 0; i < args.length; i++) {
-            switch (args[i]) {
-                case "-h":
-                case "--help":
-                    showHelp = true;
-                    break;
-                case "-a":
-                case "--add":
-                    if (i + 1 < args.length) {
-                        addItem = args[++i];
-                    } else {
-                        SignalCliSend.signalCliSend(sourceNumber,"Error: Missing argument for -a/--add");
-                        break;
-                    }
-                    break;
-                case "-d":
-                case "--delete":
-                    if (i + 1 < args.length) {
-                        deleteItem = args[++i];
-                    } else {
-                        SignalCliSend.signalCliSend(sourceNumber,"Error: Missing argument for -d/--delete");
-                        break;
-                    }
-                    break;
-                case "-c":
-                    if (i + 1 < args.length) {
-                        searchItem = args[++i];
-                    } else {
-                        SignalCliSend.signalCliSend(sourceNumber,"Error: Missing arguments for -c");
-                        break;
-                    }
-                    break;
-                default:
-                    findFilds(sourceNumber, args[i]);
-            }
-        }
+        String arguments = (parts.length > 1) ? parts[1] : "";
 
-        // Show help if requested or if no other options are used
-        if (showHelp || args.length == 0) {
-            SignalCliSend.signalCliSend(sourceNumber, showHelp());
-
-        }
-
-        // Handle add operation
-        if (addItem != null) {
-            SignalCliSend.signalCliSend(sourceNumber,"Adding item: " + addItem);
-            // Perform add operation here
-        }
-
-        // Handle delete operation
-        if (deleteItem != null) {
-            SignalCliSend.signalCliSend(sourceNumber,"Deleting item: " + deleteItem);
-            // Perform delete operation here
-        }
-
-        // Handle change operation
-        if (searchItem != null) {
-            Integer result = SignalGetData.countSearchFields(searchItem);
-            SignalCliSend.signalCliSend(sourceNumber,"Count item: " + result);
-            // Perform change operation here
+        switch (command){
+            case "help":
+            case "h":
+                handleHelp(sourceNumber);
+                break;
+            case "update":
+            case "u":
+                handleUpdate(sourceNumber, arguments);
+                break;
+            case "delete":
+            case "d":
+                handleDelete(sourceNumber, arguments);
+                break;
+            default:
+                hadnleSearch(sourceNumber, trimmedMessage);
+                break;
         }
     }
 
-    private static String showHelp() {
-        return """
-                Usage: java ScpCommandLineParser [options]
-                Options:
-                  -h, --help        Show help
-                  -c, Загальна кількість
-                   <пошук>""";
+    private static void handleHelp(String recipient){
+        String helpText = """
+                Available commands:
+                <serial_number> - Search for device
+                help - Show this help message
+                update <serial_number> - <field=value> [field2=value2]... - Update device info
+                delete <serial_number> - Delete device""";
+        sendResponse(recipient, helpText);
     }
 
-    private static void sendMessage(String sourceNumber, String message){
-        SignalCliSend signalCliSend = new SignalCliSend();
-        signalCliSend.signalCliSend(sourceNumber, message);
-    }
-
-    //Try to find the item if no argument is given
-    private static void findFilds(String sourceNumber, String arg){
-        List<String> results = new ArrayList<>();
-        results = SignalGetData.getData(arg);
+    private static void hadnleSearch(String recipient, String serialNumbere){
+        log.info("Handling search for s/n: {}", serialNumbere);
+        List<String> results = SignalGetData.getData(serialNumbere);
+        //results =
         if (results.isEmpty()){
-            SignalCliSend.signalCliSend(sourceNumber, "Запису не знайдено");
+            sendResponse(recipient, "Запису не знайдено");
         } else {
             for(String result : results){
-                SignalCliSend.signalCliSend(sourceNumber, result);
+                sendResponse(recipient, result);
             }
         }
     }
 
-    private static void countFilds(String sourceNumber, String arg){
+    private static void handleDelete(String recipient, String args){
+        String serialNumbers = args.trim();
+        if (serialNumbers.isEmpty()){
+            sendResponse(recipient, "Помилка: Укажіть серійний номер для видалення. Використання: delete <serial_number>");
+            return;
+        }
+        log.info("Handling delete for s/n: {}", serialNumbers);
+        //String result =
+        sendResponse(recipient, "Функція знаходться в розробці");
+    }
 
+    private static void handleUpdate(String recipient, String args){
+        String[] updateParts = args.trim().split("\\s+", 2); // Split S/N from the restv
+        if (updateParts.length < 2){
+            sendResponse(recipient, "Помилка: Недійсний формат оновлення. Використання: update <serial_number> <field=value> ...");
+            return;
+        }
+        String serialNumber = updateParts[0];
+        String updateDataString = updateParts[1];
+        log.info("Handling update for S/N: {}, Data: {}", serialNumber, updateDataString);
+        //String result =
+        sendResponse(recipient, "Функція знаходться в розробці");
+
+    }
+
+    private static void sendResponse(String recipient, String message){
+        log.info("Sending response to {}: {}", recipient, message);
+        SignalCliSend.signalCliSend(recipient, message);
     }
 }

@@ -26,6 +26,7 @@ public class GetPropety {
             log.error("config.properties file not found");
             System.exit(1);
         } catch (IOException e) {
+            log.error("Error reade property file: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
         return null;

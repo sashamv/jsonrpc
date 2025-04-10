@@ -70,7 +70,7 @@ public class SignalCliEventListener {
                             log.error("Error stream response: {}", errorResponse);
                         }
                     } catch (IOException ex) {
-                        log.warn("IOException while reading error stream: {}", ex.getMessage());
+                        log.warn("IOException while reading error stream: {}", ex.getMessage(), ex);
                     }
                 }
 
@@ -80,7 +80,7 @@ public class SignalCliEventListener {
 //            } catch (SocketTimeoutException e){
 //                log.warn("Read timeout: No data received, retrying...");
             } catch (IOException e) {
-                log.error("Connection error occurred: {}", e.getMessage());
+                log.error("Connection error occurred: {}", e.getMessage(), e);
             } finally {
                 if (connection != null) {
                     connection.disconnect();
