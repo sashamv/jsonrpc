@@ -79,7 +79,6 @@ public class CommandLineParser {
         log.info("Handling update for S/N: {}, Data: {}", serialNumber, updateDataString);
         //String result =
         sendResponse(recipient, "Функція оновлення знаходться в розробці ¯\\_(ツ)_/¯");
-
     }
 
     private static void sendResponse(String recipient, String message){
